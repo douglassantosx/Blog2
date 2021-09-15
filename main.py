@@ -11,10 +11,10 @@ from flask_gravatar import Gravatar
 from functools import wraps
 from flask import abort
 from sqlalchemy import ForeignKey
-# from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.ext.declarative import declarative_base
 import os
 
-# Base = declarative_base()
+Base = declarative_base()
 
 app = Flask(__name__)
 app.config['SECRET_KEY'] = os.environ.get("SECRET_KEY")
@@ -33,9 +33,6 @@ login_manager.init_app(app)
 
 gravatar = Gravatar(app, size=100, rating='g', default='retro', force_default=False, force_lower=False, use_ssl=False, base_url=None)
 
-@login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(int(user_id))
 
 ##CONFIGURE TABLES
 class User(UserMixin, db.Model):
@@ -74,9 +71,13 @@ class Comment(db.Model):
     parent_post = relationship("BlogPost", back_populates="comments")
     text = db.Column(db.Text, nullable=False)
 
-# db.create_all()
+db.create_all()
 # db.session.commit()
 
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 def admin_only(f):
     @wraps(f)
